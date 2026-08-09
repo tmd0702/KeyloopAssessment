@@ -78,6 +78,10 @@ The backend must query those systems **in parallel** and the UI must present one
 
 The core engineering problem is therefore not large-scale document processing. At the assumed ~120 metadata records per search, the harder problem is **dependable aggregation across two independent, differently behaving external dependencies**.
 
+#### Implemented UI
+
+![Unified Document Viewer showing a complete 120-document search](images/unified-search_ui.jpg)
+
 ### 2.2 Use Case Diagram
 
 The primary actor is a **dealership user** searching for vehicle documents. Sales and Service are secondary systems that supply document metadata. The diagram separates the assessment-required behavior from production-oriented behaviors added to make the design resilient and operable.
@@ -823,16 +827,9 @@ Severity semantics:
 - `Warning` — handled degradation, such as Service timing out while Sales still produces a `PARTIAL` result.
 - `Error` — unexpected internal failure.
 
-#### Runtime evidence placeholder
+![Kibana Discover showing correlated search lifecycle events](images/unified-search_kibana.jpg)
 
-> 📸 **Insert a real Kibana Discover screenshot before submission.**  
-> Suggested columns: `@timestamp | log.level | event.name | provider | duration_ms | search.status | trace.id`
-
-<!-- Example final path:
-![Kibana structured logs showing one VIN search](./images/kibana-vin-search.png)
--->
-
-The evidence should show one correlated search lifecycle, including provider completion/failure and the final search outcome.
+The captured search lifecycle includes provider completion, distributed-lock release, and the final `COMPLETE` outcome.
 
 ### 9.2 Grafana — Metrics
 
@@ -852,16 +849,9 @@ The Grafana dashboard should make the most important design decisions measurable
 
 No VIN or `DealershipId` is used as a Prometheus label because that would create high-cardinality metrics.
 
-#### Runtime evidence placeholder
+![Grafana dashboard showing request rate, search latency, partial results, and provider failures](images/unified-search_prometheus.jpg)
 
-> 📸 **Insert a real Grafana dashboard screenshot before submission.**  
-> Recommended panels: `Request rate | TTFR/p95 latency | Partial rate | Sales/Service latency | L1/L2 cache hit rate | Lock contention | Provider limiter rejection`
-
-<!-- Example final path:
-![Grafana Unified Document Service dashboard](./images/grafana-dashboard.png)
--->
-
-The evidence should make latency, provider health, cache effectiveness, and contention visible in one operational view.
+The dashboard makes request rate, latency percentiles, partial-result rate, provider latency, and provider failures visible in one operational view.
 
 ### 9.3 Tempo — Distributed Tracing
 
@@ -886,15 +876,11 @@ sequenceDiagram
 
 Overlapping Sales and Service spans provide runtime proof that the required provider calls execute concurrently and identify which dependency dominates latency.
 
-#### Runtime evidence placeholder
+![Tempo trace search showing the streamed document request](images/unified-search_tempo_1.jpg)
 
-<!-- Replace with real screenshot if captured:
-![Tempo trace proving Sales and Service overlap](./images/tempo-parallel-trace.png)
--->
+![Tempo trace timeline showing overlapping Sales and Service provider spans](images/unified-search_tempo_2.jpg)
 
-> 📸 **Insert a real Tempo trace screenshot here before submission if available.**
-
-The same `trace.id` should be searchable in Kibana and Tempo.
+The same `trace.id` is searchable in Kibana and Tempo; the expanded timeline shows Sales and Service work overlapping within the SSE request.
 
 ---
 

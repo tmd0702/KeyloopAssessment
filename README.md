@@ -4,6 +4,8 @@
 
 This is Scenario D: a Unified Document Viewer. It accepts a VIN search, requests Sales and Service documents concurrently, normalizes their different contracts into one canonical model, and returns a consolidated view. Every document retains its source, and a failed provider yields a useful `PARTIAL` response when the other succeeds.
 
+![Unified Document Viewer interface](docs/images/unified-search_ui.jpg)
+
 ## Architecture at a Glance
 
 ```mermaid

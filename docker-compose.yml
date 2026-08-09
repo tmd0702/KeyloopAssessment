@@ -1,0 +1,52 @@
+services:
+  sales-mock:
+    build: ./mocks/Keyloop.MockSalesApi
+    ports: ["5101:8080"]
+  service-mock:
+    build: ./mocks/Keyloop.MockServiceApi
+    ports: ["5102:8080"]
+  unified-api:
+    build:
+      context: .
+      dockerfile: src/backend/Keyloop.UnifiedDocuments.Api/Dockerfile
+    ports: ["5100:8080"]
+    environment:
+      Providers__Sales__BaseUrl: http://sales-mock:8080/
+      Providers__Service__BaseUrl: http://service-mock:8080/
+      Observability__ElasticsearchUrl: http://elasticsearch:9200
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4317
+      Caching__RedisConnection: redis:6379,abortConnect=false
+      Audit__Enabled: "false"
+    depends_on: [sales-mock, service-mock, elasticsearch, tempo, redis]
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+    ports: ["9200:9200"]
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.17.0
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports: ["5601:5601"]
+    depends_on: [elasticsearch]
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+  tempo:
+    image: grafana/tempo:2.7.1
+    command: ["-config.file=/etc/tempo.yml"]
+    volumes:
+      - ./observability/tempo/tempo.yml:/etc/tempo.yml:ro
+    ports: ["3200:3200", "4317:4317"]
+  grafana:
+    image: grafana/grafana:11.5.0
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports: ["3000:3000"]
+    depends_on: [prometheus, tempo]

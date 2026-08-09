@@ -1,0 +1,53 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  transform/logs:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - set(attributes["log.level"], severity_text)
+          - set(attributes["event.name"], attributes["EventName"]) where attributes["EventName"] != nil
+          - set(attributes["provider"], attributes["Provider"]) where attributes["Provider"] != nil
+          - set(attributes["duration_ms"], attributes["DurationMs"]) where attributes["DurationMs"] != nil
+          - set(attributes["document_count"], attributes["DocumentCount"]) where attributes["DocumentCount"] != nil
+          - set(attributes["failure_type"], attributes["FailureType"]) where attributes["FailureType"] != nil
+          - set(attributes["search.status"], attributes["SearchStatus"]) where attributes["SearchStatus"] != nil
+          - set(attributes["sales_status"], attributes["SalesStatus"]) where attributes["SalesStatus"] != nil
+          - set(attributes["service_status"], attributes["ServiceStatus"]) where attributes["ServiceStatus"] != nil
+          - set(attributes["cache.level"], attributes["CacheLevel"]) where attributes["CacheLevel"] != nil
+          - set(attributes["cache.result"], attributes["CacheResult"]) where attributes["CacheResult"] != nil
+  batch:
+    timeout: 1s
+    send_batch_size: 512
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  elasticsearch/logs:
+    endpoints: ["http://elasticsearch:9200"]
+    logs_index: keyloop-unified-documents-logs-ecs
+    mapping:
+      mode: ecs
+
+service:
+  telemetry:
+    logs:
+      level: info
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [transform/logs, batch]
+      exporters: [elasticsearch/logs]

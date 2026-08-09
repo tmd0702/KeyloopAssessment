@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: unified-documents-api-config
+  namespace: keyloop
+  labels:
+    app.kubernetes.io/name: unified-documents
+    app.kubernetes.io/component: backend
+data:
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://+:8080
+  Providers__Sales__BaseUrl: https://sales-api.example.invalid/
+  Providers__Service__BaseUrl: https://service-api.example.invalid/
+  Search__OverallTimeoutSeconds: "12"
+  Providers__Sales__TimeoutSeconds: "6"
+  Providers__Sales__Concurrency__PermitLimit: "16"
+  Providers__Sales__Concurrency__QueueLimit: "16"
+  Providers__Sales__Concurrency__QueueTimeoutMilliseconds: "500"
+  Providers__Service__TimeoutSeconds: "10"
+  Providers__Service__Concurrency__PermitLimit: "12"
+  Providers__Service__Concurrency__QueueLimit: "12"
+  Providers__Service__Concurrency__QueueTimeoutMilliseconds: "750"
+  Audit__Enabled: "false"
+  Audit__EventHubName: document-search-audit
+  Caching__L1SizeLimitBytes: "33554432"
+  Caching__L1TtlSeconds: "30"
+  Caching__L2TtlSeconds: "120"
+  Caching__EmptyResultTtlSeconds: "30"
+  Caching__TtlJitterPercent: "10"
+  Caching__DistributedLock__Enabled: "true"
+  Caching__DistributedLock__LeaseSeconds: "30"
+  Caching__DistributedLock__WaitSeconds: "10"
+  Caching__DistributedLock__RetryDelayMilliseconds: "100"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo-collector.observability.svc.cluster.local:4317
+  Observability__ElasticsearchUrl: http://elasticsearch.logging.svc.cluster.local:9200

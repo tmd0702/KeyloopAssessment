@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/mocks/">
+    <Project Path="mocks/Keyloop.MockSalesApi/Keyloop.MockSalesApi.csproj" />
+    <Project Path="mocks/Keyloop.MockServiceApi/Keyloop.MockServiceApi.csproj" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/">
+    <Project Path="src/backend/Keyloop.UnifiedDocuments.Api/Keyloop.UnifiedDocuments.Api.csproj" />
+    <Project Path="src/backend/Keyloop.UnifiedDocuments.Application/Keyloop.UnifiedDocuments.Application.csproj" />
+    <Project Path="src/backend/Keyloop.UnifiedDocuments.Infrastructure/Keyloop.UnifiedDocuments.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Keyloop.UnifiedDocuments.IntegrationTests/Keyloop.UnifiedDocuments.IntegrationTests.csproj" />
+    <Project Path="tests/Keyloop.UnifiedDocuments.UnitTests/Keyloop.UnifiedDocuments.UnitTests.csproj" />
+  </Folder>
+</Solution>

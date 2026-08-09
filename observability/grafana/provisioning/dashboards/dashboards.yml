@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: Keyloop
+    folder: Keyloop
+    type: file
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

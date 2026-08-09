@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unified-documents-api
+  namespace: keyloop
+  labels:
+    app.kubernetes.io/name: unified-documents
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: unified-documents
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: unified-documents
+        app.kubernetes.io/component: backend
+    spec:
+      terminationGracePeriodSeconds: 30
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: unified-documents
+              app.kubernetes.io/component: backend
+      containers:
+        - name: unified-documents-api
+          image: ghcr.io/your-org/keyloop-unified-documents-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: unified-documents-api-config
+          env:
+            - name: Jwt__SigningKey
+              valueFrom:
+                secretKeyRef:
+                  name: unified-documents-api-secrets
+                  key: Jwt__SigningKey
+            - name: Providers__Sales__BearerToken
+              valueFrom:
+                secretKeyRef:
+                  name: unified-documents-api-secrets
+                  key: Providers__Sales__BearerToken
+            - name: Providers__Service__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: unified-documents-api-secrets
+                  key: Providers__Service__ApiKey
+            - name: Caching__RedisConnection
+              valueFrom:
+                secretKeyRef:
+                  name: unified-documents-api-secrets
+                  key: Caching__RedisConnection
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: data-protection
+              mountPath: /home/app/.aspnet/DataProtection-Keys
+      securityContext:
+        runAsNonRoot: true
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 64Mi
+        - name: data-protection
+          emptyDir:
+            sizeLimit: 16Mi

@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: unified-documents-api
+  namespace: keyloop
+  labels:
+    app.kubernetes.io/name: unified-documents
+    app.kubernetes.io/component: backend
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: unified-documents
+      app.kubernetes.io/component: backend

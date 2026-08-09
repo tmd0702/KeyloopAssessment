@@ -1,0 +1,24 @@
+{
+  "title": "Unified Document Service",
+  "uid": "unified-documents-service",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {"type":"timeseries","title":"Request Rate","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(document_search_requests_total[5m]))","legendFormat":"searches/s","refId":"A"}],"gridPos":{"h":8,"w":8,"x":0,"y":0}},
+    {"type":"timeseries","title":"Search Latency","datasource":{"uid":"prometheus"},"targets":[{"expr":"histogram_quantile(0.50, sum(rate(document_search_duration_seconds_bucket[5m])) by (le))","legendFormat":"p50","refId":"A"},{"expr":"histogram_quantile(0.95, sum(rate(document_search_duration_seconds_bucket[5m])) by (le))","legendFormat":"p95","refId":"B"},{"expr":"histogram_quantile(0.99, sum(rate(document_search_duration_seconds_bucket[5m])) by (le))","legendFormat":"p99","refId":"C"}],"gridPos":{"h":8,"w":8,"x":8,"y":0}},
+    {"type":"timeseries","title":"Complete vs Partial Results","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(document_search_requests_total[5m])) by (status)","legendFormat":"{{status}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":16,"y":0}},
+    {"type":"timeseries","title":"Partial Result Rate","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(document_search_partial_total[5m])) / clamp_min(sum(rate(document_search_requests_total[5m])), 1)","legendFormat":"partial","refId":"A"}],"gridPos":{"h":8,"w":8,"x":0,"y":8}},
+    {"type":"timeseries","title":"Provider Latency","datasource":{"uid":"prometheus"},"targets":[{"expr":"histogram_quantile(0.95, sum(rate(provider_request_duration_seconds_bucket[5m])) by (le, provider))","legendFormat":"{{provider}} p95","refId":"A"}],"gridPos":{"h":8,"w":8,"x":8,"y":8}},
+    {"type":"timeseries","title":"Provider Failures and Timeouts","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(provider_failures_total[5m])) by (provider, failure_type)","legendFormat":"failure {{provider}} {{failure_type}}","refId":"A"},{"expr":"sum(rate(provider_timeouts_total[5m])) by (provider)","legendFormat":"timeout {{provider}}","refId":"B"}],"gridPos":{"h":8,"w":8,"x":16,"y":8}},
+    {"type":"timeseries","title":"L1 Cache Hit / Miss","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(provider_cache_requests_total{layer=\"l1\"}[5m])) by (result)","legendFormat":"{{result}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":0,"y":16}},
+    {"type":"timeseries","title":"Redis L2 Cache Hit / Miss","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(provider_cache_requests_total{layer=\"redis\"}[5m])) by (result)","legendFormat":"{{result}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":8,"y":16}},
+    {"type":"timeseries","title":"Redis Cache Failures","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(provider_cache_errors_total[5m])) by (operation)","legendFormat":"{{operation}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":16,"y":16}},
+    {"type":"timeseries","title":"Active SSE Connections","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(sse_active_connections)","legendFormat":"active","refId":"A"}],"gridPos":{"h":8,"w":8,"x":0,"y":24}},
+    {"type":"timeseries","title":"SSE Time To First Result","datasource":{"uid":"prometheus"},"targets":[{"expr":"histogram_quantile(0.50, sum(rate(document_search_time_to_first_result_seconds_bucket[5m])) by (le))","legendFormat":"p50","refId":"A"},{"expr":"histogram_quantile(0.95, sum(rate(document_search_time_to_first_result_seconds_bucket[5m])) by (le))","legendFormat":"p95","refId":"B"},{"expr":"histogram_quantile(0.99, sum(rate(document_search_time_to_first_result_seconds_bucket[5m])) by (le))","legendFormat":"p99","refId":"C"}],"gridPos":{"h":8,"w":8,"x":8,"y":24}},
+    {"type":"timeseries","title":"Provider Concurrency Rejections","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(provider_concurrency_rejections_total[5m])) by (provider, result)","legendFormat":"{{provider}} {{result}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":16,"y":24}},
+    {"type":"timeseries","title":"Provider Concurrency Wait","datasource":{"uid":"prometheus"},"targets":[{"expr":"histogram_quantile(0.95, sum(rate(provider_concurrency_wait_duration_seconds_bucket[5m])) by (le, provider))","legendFormat":"{{provider}} p95","refId":"A"}],"gridPos":{"h":8,"w":8,"x":0,"y":32}},
+    {"type":"timeseries","title":"Distributed Lock Contention","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(distributed_lock_contention_total[5m])) by (provider)","legendFormat":"{{provider}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":8,"y":32}},
+    {"type":"timeseries","title":"Provider Concurrency Acquisitions","datasource":{"uid":"prometheus"},"targets":[{"expr":"sum(rate(provider_concurrency_acquisitions_total[5m])) by (provider, result)","legendFormat":"{{provider}} {{result}}","refId":"A"}],"gridPos":{"h":8,"w":8,"x":16,"y":32}}
+  ]
+}

@@ -1,0 +1,11 @@
+.git
+.github
+.vs
+**/bin
+**/obj
+**/node_modules
+deploy
+docs
+observability
+tests
+README.md
